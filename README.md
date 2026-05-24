@@ -2,6 +2,8 @@ flowser - file browser
 
 very fast zero config file browser. A bit like filebrowser but without javascript
 
+[![](https://github.com/dvolk/flowser/raw/master/flowser.png)](#features)
+
 # Install
 
     python3 -m venv env
