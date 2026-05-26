@@ -133,6 +133,8 @@ def browse(subpath: str):
             # File entry
             rel_path = os.path.relpath(entry.path, ROOT_DIR).replace("\\", "/")
             file_url = url_for("download", filepath=rel_path)
+            if is_image(name):
+                file_url = url_for("viewer", filepath=rel_path)
             ext = os.path.splitext(name)[1][1:].lower()
 
             thumb_url = None
@@ -157,6 +159,38 @@ def browse(subpath: str):
         current_dir=subpath,
         upload_url=upload_url,
     )
+
+
+VIEW_IMAGE_TEMPLATE = r"""
+<!doctype html>
+<style>
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #111;
+}
+
+img {
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+
+  image-rendering: pixelated;
+}
+</style>
+<a href="/download/{{ path }}"><img src="/download/{{ path }}"></a>
+"""
+
+
+@app.route("/viewer/<path:filepath>")
+def viewer(filepath: str):
+    """Serve a raw file from the root directory."""
+    abs_path = os.path.abspath(os.path.join(ROOT_DIR, filepath))
+    if not abs_path.startswith(os.path.abspath(ROOT_DIR)):
+        abort(403)
+    if not os.path.isfile(abs_path):
+        abort(404)
+    return render_template_string(VIEW_IMAGE_TEMPLATE, path=filepath)
 
 
 @app.route("/download/<path:filepath>")
