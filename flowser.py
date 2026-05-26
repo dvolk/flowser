@@ -327,7 +327,7 @@ HTML_TEMPLATE = r"""
                     </svg>
                 {% elif item.thumbnail %}
                     <!-- Image thumbnail -->
-                    <img src="{{ item.thumbnail }}" alt="{{ item.name }}">
+                    <img loading=lazy src="{{ item.thumbnail }}" alt="{{ item.name }}">
                 {% else %}
                     <!-- Generic file placeholder with extension -->
                     <svg class="folder-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
