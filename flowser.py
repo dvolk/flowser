@@ -47,7 +47,7 @@ def is_image(filename: str) -> bool:
     return False
 
 
-def get_thumbnail_url(rel_path: str, abs_path: str, mtime: float) -> str | None:
+def get_thumbnail_url(rel_path: str, abs_path: str) -> str | None:
     """
     Ensure a thumbnail exists for the given image file and return its URL.
     `rel_path` is the relative path from ROOT_DIR (using forward slashes).
@@ -56,8 +56,8 @@ def get_thumbnail_url(rel_path: str, abs_path: str, mtime: float) -> str | None:
     thumb_name = hashlib.md5(rel_path.encode()).hexdigest() + ".jpg"
     thumb_path = os.path.join(THUMB_DIR, thumb_name)
 
-    # (Re)generate if missing or outdated
-    if not os.path.exists(thumb_path) or os.path.getmtime(thumb_path) < mtime:
+    # Generate if missing (assume files never change, so never regenerate)
+    if not os.path.exists(thumb_path):
         try:
             img = Image.open(abs_path)
             img.thumbnail((200, 200))
@@ -69,8 +69,7 @@ def get_thumbnail_url(rel_path: str, abs_path: str, mtime: float) -> str | None:
             # If generation fails (e.g. AVIF without libavif support) return None
             return None
 
-    # Append modification time as query parameter for cache busting
-    return url_for("serve_thumbnail", filename=thumb_name) + f"?t={int(mtime)}"
+    return url_for("serve_thumbnail", filename=thumb_name)
 
 
 # ----------------------------------------------------------------------
@@ -138,9 +137,7 @@ def browse(subpath: str):
 
             thumb_url = None
             if is_image(name):
-                thumb_url = get_thumbnail_url(
-                    rel_path, entry.path, entry.stat().st_mtime
-                )
+                thumb_url = get_thumbnail_url(rel_path, entry.path)
 
             item = {
                 "type": "file",
